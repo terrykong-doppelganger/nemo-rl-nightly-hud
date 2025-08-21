@@ -204,12 +204,13 @@ def build_commit_ci_table(
         overall = res.get("status") if res else None
         if overall is None and pass_flags:
             overall = "good" if all(pass_flags) else ("fail" if any(not p for p in pass_flags) else "unknown")
+        overall_symbol = "🟢" if overall and _is_pass(overall) else ("🔴" if overall else "")
         output = {
             "commit date": row["commit_date"],
-            "short commit sha": row["short_sha"],
+            "commit": row["short_sha"],
             "commit title": row["commit_title"],
-            "overall ci test result": overall if overall else "",
-            "percentage passed": pct_pass if pct_pass is not None else np.nan,
+            "overall": overall_symbol,
+            "% passed": pct_pass if pct_pass is not None else np.nan,
         }
         for name in filtered_tests:
             output[name] = _status_to_symbol(statuses.get(name)) if name in statuses else ""
@@ -219,10 +220,10 @@ def build_commit_ci_table(
     # Sort columns: fixed columns first, then alphabetical test names
     fixed_cols = [
         "commit date",
-        "short commit sha",
+        "commit",
         "commit title",
-        "overall ci test result",
-        "percentage passed",
+        "overall",
+        "% passed",
     ]
     test_cols = [c for c in df.columns if c not in fixed_cols]
     df = df[fixed_cols + sorted(test_cols)]
@@ -367,10 +368,10 @@ else:
     display_df["commit date"] = pd.to_datetime(display_df["commit date"]).dt.tz_convert(None)
     fixed_cols = [
         "commit date",
-        "short commit sha",
+        "commit",
         "commit title",
-        "overall ci test result",
-        "percentage passed",
+        "overall",
+        "% passed",
     ]
     gb = GridOptionsBuilder.from_dataframe(display_df)
     gb.configure_default_column(resizable=True, sortable=True, filter=False)
