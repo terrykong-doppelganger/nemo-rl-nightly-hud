@@ -3,3 +3,4 @@ pandas>=2.1
 requests>=2.31
 altair>=5.0
 watchdog
+streamlit-aggrid>=0.3.5

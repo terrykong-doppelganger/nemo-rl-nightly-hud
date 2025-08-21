@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import requests
 import streamlit as st
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Basic page config
 st.set_page_config(page_title="NeMo RL Nightly HUD", page_icon="🧭", layout="wide")
@@ -364,18 +365,26 @@ else:
     # Light formatting for display
     display_df = table_df.copy()
     display_df["commit date"] = pd.to_datetime(display_df["commit date"]).dt.tz_convert(None)
-    st.dataframe(
+    fixed_cols = [
+        "commit date",
+        "short commit sha",
+        "commit title",
+        "overall ci test result",
+        "percentage passed",
+    ]
+    gb = GridOptionsBuilder.from_dataframe(display_df)
+    gb.configure_default_column(resizable=True, sortable=True, filter=False)
+    for col in fixed_cols:
+        if col in display_df.columns:
+            gb.configure_column(col, pinned="left")
+    grid_options = gb.build()
+    AgGrid(
         display_df,
-        use_container_width=True,
+        gridOptions=grid_options,
         height=800,
-        hide_index=True,
-        column_config={
-            "commit date": st.column_config.DatetimeColumn(format="YYYY-MM-DD HH:mm"),
-            "short commit sha": st.column_config.TextColumn(help="First 7 chars of commit SHA"),
-            "commit title": st.column_config.TextColumn(width="medium"),
-            "overall ci test result": st.column_config.TextColumn(),
-            "percentage passed": st.column_config.NumberColumn(format="%.1f%%"),
-        },
+        theme="streamlit",
+        enable_enterprise_modules=False,
+        fit_columns_on_grid_load=False,
     )
 
     # Build line chart: one line per test, y=pass/fail (1/0), x=commit date
