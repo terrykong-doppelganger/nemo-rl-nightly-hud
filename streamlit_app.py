@@ -399,9 +399,38 @@ else:
     ]
     gb = GridOptionsBuilder.from_dataframe(display_df)
     gb.configure_default_column(resizable=True, sortable=True, filter=False)
+
+    # Keep key metadata columns pinned
     for col in fixed_cols:
         if col in display_df.columns:
             gb.configure_column(col, pinned="left")
+
+    # Compact test columns: emoji-only cells with header tooltip showing full test name
+    test_cols = [c for c in display_df.columns if c not in fixed_cols]
+    for c in test_cols:
+        gb.configure_column(
+            c,
+            header_name="",
+            headerTooltip=c,
+            width=42,
+            minWidth=34,
+            maxWidth=48,
+            resizable=False,
+            sortable=False,
+            filter=False,
+            cellStyle={"textAlign": "center", "fontSize": "18px", "padding": "0px"},
+        )
+
+    # Make the overall column compact and centered as well
+    if "overall" in display_df.columns:
+        gb.configure_column(
+            "overall",
+            width=60,
+            minWidth=54,
+            maxWidth=70,
+            cellStyle={"textAlign": "center", "fontSize": "18px"},
+        )
+
     grid_options = gb.build()
 
     # Build line chart: one line per test, y=pass/fail (1/0), x=commit date
@@ -489,6 +518,8 @@ else:
                 )
 
                 st.altair_chart((lines + points).properties(height=360), use_container_width=True)
+
+    st.caption("Tip: Hover over test column headers to see the full test name.")
 
     AgGrid(
         display_df,
