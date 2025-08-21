@@ -17,7 +17,7 @@ import hashlib
 st.set_page_config(page_title="NeMo RL Nightly HUD", page_icon="🧭", layout="wide")
 st.title("🧭 NeMo RL Nightly HUD")
 st.caption(
-    "Nightly CI HUD for commits in NVIDIA-NeMo/RL."
+    "Nightly CI HUD for commits in [NVIDIA-NeMo/RL](https://github.com/NVIDIA-NeMo/RL). This dashboard is under active development."
 )
 
 
