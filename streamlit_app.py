@@ -35,7 +35,7 @@ def _github_headers() -> Dict[str, str]:
     return {"Accept": "application/vnd.github+json"}
 
 
-@st.cache_data(ttl=1800)
+@st.cache_data(ttl=3600)
 def fetch_commits(max_commits: int = DEFAULT_MAX_COMMITS) -> pd.DataFrame:
     """Fetch recent commits on main branch from GitHub and return a DataFrame.
 
@@ -210,6 +210,7 @@ def build_commit_ci_table(
             "commit date": row["commit_date"],
             "commit": row["short_sha"],
             "commit title": row["commit_title"],
+            "pipeline id": (res.get("pipeline_id") if res else None),
             "overall": overall_symbol,
             "% passed": pct_pass if pct_pass is not None else np.nan,
         }
@@ -223,6 +224,7 @@ def build_commit_ci_table(
         "commit date",
         "commit",
         "commit title",
+        "pipeline id",
         "overall",
         "% passed",
     ]
@@ -430,6 +432,10 @@ else:
             maxWidth=70,
             cellStyle={"textAlign": "center", "fontSize": "18px"},
         )
+
+    # Slightly constrain pipeline id column
+    if "pipeline id" in display_df.columns:
+        gb.configure_column("pipeline id", width=120, minWidth=100, maxWidth=160)
 
     grid_options = gb.build()
 
