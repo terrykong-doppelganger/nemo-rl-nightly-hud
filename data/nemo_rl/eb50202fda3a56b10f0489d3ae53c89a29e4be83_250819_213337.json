@@ -1,0 +1,26 @@
+{
+  "status": "fail",
+  "pipeline_id": 800003,
+  "commit": "eb50202fda3a56b10f0489d3ae53c89a29e4be83",
+  "created": "2025-08-19T21:33:37Z",
+  "tests": {
+    "grpo-deepscaler": {
+      "status": "fail",
+      "metrics": {
+        "step_time": 0.35
+      }
+    },
+    "rm-helpsteer": {
+      "status": "good",
+      "metrics": {
+        "pair_accuracy": 0.72
+      }
+    },
+    "eval-math500": {
+      "status": "good",
+      "metrics": {
+        "pass_at_1": 0.34
+      }
+    }
+  }
+}

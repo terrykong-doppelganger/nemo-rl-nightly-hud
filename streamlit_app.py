@@ -80,6 +80,12 @@ def fetch_commits(max_commits: int = DEFAULT_MAX_COMMITS) -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=86400)
+def get_cached_today() -> pd.Timestamp.date:
+    """Return today's UTC date, cached for 24 hours."""
+    return pd.Timestamp.utcnow().date()
+
+
 def _status_to_symbol(status_value: str) -> str:
     if not status_value:
         return ""
@@ -233,7 +239,12 @@ with st.sidebar:
         "(https://github.com/NVIDIA-NeMo/RL)."
     )
     max_commits = st.slider("Max commits to fetch", 50, 500, DEFAULT_MAX_COMMITS, step=50)
-    tests_regex = st.text_input("Filter tests by regex", value=".*", help="e.g., grpo|dpo|sft")
+    tests_regex = st.text_input(
+        "Filter tests by regex",
+        value="",
+        placeholder="e.g., grpo|dpo|sft (empty = all)",
+        help="Press Enter to apply. Empty means all tests (.*)",
+    )
     st.caption(f"CI JSON directory: `{DATA_DIR}`")
 
 
@@ -293,13 +304,18 @@ if not commits_df.empty:
     min_date = pd.to_datetime(commits_df["commit_date"].min()).tz_convert("UTC").date()
     max_date = pd.to_datetime(commits_df["commit_date"].max()).tz_convert("UTC").date()
 else:
-    today = pd.Timestamp.utcnow().date()
+    today = get_cached_today()
     min_date = today
     max_date = today
 
+# Default: 3 weeks ago to today, clamped to available commit dates
+today = get_cached_today()
+default_start = max(min_date, today - pd.Timedelta(days=21))
+default_end = min(max_date, today)
+
 date_range_input = st.date_input(
     "Commit date range",
-    value=(min_date, max_date),
+    value=(default_start, default_end),
     min_value=min_date,
     max_value=max_date,
 )
@@ -315,9 +331,18 @@ else:
 filtered_tests = collect_filtered_test_names(
     commits_df=commits_df,
     results_by_sha=results_by_sha,
-    tests_regex=tests_regex,
+    tests_regex=tests_regex if tests_regex else ".*",
     date_range=(start_dt, end_dt),
 )
+
+# Preview matching tests in sidebar
+with st.sidebar:
+    if filtered_tests:
+        st.markdown("**Matching tests**")
+        st.code("\n".join(filtered_tests), language="text")
+    else:
+        st.markdown("**Matching tests**")
+        st.code("<none>", language="text")
 
 # Early diagnostics if no tests detected
 if not results_by_sha:

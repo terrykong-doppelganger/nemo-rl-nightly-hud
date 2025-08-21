@@ -1,0 +1,27 @@
+{
+  "status": "good",
+  "pipeline_id": 800000,
+  "commit": "38e9ef10be7424a03af669a89c001e8f25d3740c",
+  "created": "2025-08-20T15:38:37Z",
+  "tests": {
+    "grpo-deepscaler": {
+      "status": "good",
+      "metrics": {
+        "step_time": 0.27,
+        "tokens_per_s": 1200
+      }
+    },
+    "sft-llama": {
+      "status": "good",
+      "metrics": {
+        "val_loss": 2.03
+      }
+    },
+    "dpo-helpsteer": {
+      "status": "fail",
+      "metrics": {
+        "preference_accuracy": 0.61
+      }
+    }
+  }
+}
