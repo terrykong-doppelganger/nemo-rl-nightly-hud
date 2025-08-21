@@ -350,9 +350,9 @@ with st.sidebar:
         jitter_amplitude = st.slider(
             "Point jitter amplitude",
             min_value=0.0,
-            max_value=0.06,
-            value=0.015,
-            step=0.005,
+            max_value=0.75,
+            value=0.05,
+            step=0.05,
             help=(
                 "Controls how much vertical jitter is applied to points to reduce overlap. "
                 "Set to 0 to disable jitter."
@@ -443,17 +443,18 @@ else:
             if not chart_df.empty:
                 # Deterministic small jitter per test to separate overlapping points
                 def _test_jitter_value(test_name: str) -> float:
+                    # Map test name to a stable float in [-1, 1]
                     h = int(hashlib.sha256(test_name.encode("utf-8")).hexdigest(), 16)
+                    frac = (h & ((1 << 53) - 1)) / float(1 << 53)  # 53-bit fraction
+                    unit = (frac * 2.0) - 1.0
                     amplitude = float(st.session_state.get("jitter_amplitude", 0.015))
-                    return (((h % 11) - 5) * amplitude)
+                    return unit * amplitude
 
                 # Jitter only failures (pass_value == 0). Keep others on exact bands (-1 and 1)
-                jitter = chart_df["test"].map(_test_jitter_value)
+                fail_jitter = chart_df["test"].map(_test_jitter_value)
                 is_fail = chart_df["pass_value"].astype(float) == 0.0
-                # Cap jitter within +-0.15 so points do not cross tick lines visually
-                capped_jitter = jitter.clip(lower=-0.15, upper=0.15)
                 chart_df["y_jitter"] = chart_df["pass_value"].astype(float)
-                chart_df.loc[is_fail, "y_jitter"] = chart_df.loc[is_fail, "pass_value"].astype(float) + capped_jitter[is_fail]
+                chart_df.loc[is_fail, "y_jitter"] = chart_df.loc[is_fail, "pass_value"].astype(float) + fail_jitter[is_fail]
 
                 lines = (
                     alt.Chart(chart_df)
