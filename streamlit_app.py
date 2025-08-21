@@ -11,6 +11,7 @@ import pandas as pd
 import requests
 import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
+import hashlib
 
 # Basic page config
 st.set_page_config(page_title="NeMo RL Nightly HUD", page_icon="🧭", layout="wide")
@@ -240,7 +241,6 @@ with st.sidebar:
         "Commits fetched from the GitHub repo `NVIDIA-NeMo/RL` (main branch). See repo: [GitHub]"
         "(https://github.com/NVIDIA-NeMo/RL)."
     )
-    max_commits = st.slider("Max commits to fetch", 50, 500, DEFAULT_MAX_COMMITS, step=50)
     tests_regex = st.text_input(
         "Filter tests by regex",
         value="",
@@ -249,9 +249,8 @@ with st.sidebar:
     )
     st.caption(f"CI JSON directory: `{DATA_DIR}`")
 
-
 # Load commits and CI results
-commits_df = fetch_commits(max_commits=max_commits)
+commits_df = fetch_commits(max_commits=int(st.session_state.get("max_commits", DEFAULT_MAX_COMMITS)))
 results_by_sha = load_ci_results_from_disk(DATA_DIR)
 # Ensure we have CI rows for selected top commits; if missing, write sample files
 if not commits_df.empty:
@@ -312,7 +311,7 @@ else:
 
 # Default: 3 weeks ago to today, clamped to available commit dates
 today = get_cached_today()
-default_start = max(min_date, today - pd.Timedelta(days=21))
+default_start = max(min_date, today - pd.Timedelta(days=14))
 default_end = min(max_date, today)
 
 date_range_input = st.date_input(
@@ -345,6 +344,31 @@ with st.sidebar:
     else:
         st.markdown("**Matching tests**")
         st.code("<none>", language="text")
+
+with st.sidebar:
+    with st.expander("Advanced settings", expanded=False):
+        jitter_amplitude = st.slider(
+            "Point jitter amplitude",
+            min_value=0.0,
+            max_value=0.06,
+            value=0.015,
+            step=0.005,
+            help=(
+                "Controls how much vertical jitter is applied to points to reduce overlap. "
+                "Set to 0 to disable jitter."
+            ),
+        )
+        st.session_state["jitter_amplitude"] = float(jitter_amplitude)
+
+        max_commits = st.slider(
+            "Max commits to fetch",
+            min_value=50,
+            max_value=500,
+            value=st.session_state.get("max_commits", DEFAULT_MAX_COMMITS),
+            step=50,
+            help="Limits how many recent commits are pulled from GitHub.",
+        )
+        st.session_state["max_commits"] = int(max_commits)
 
 # Early diagnostics if no tests detected
 if not results_by_sha:
@@ -417,17 +441,41 @@ else:
                     )
             chart_df = pd.DataFrame(records)
             if not chart_df.empty:
-                chart = (
+                # Deterministic small jitter per test to separate overlapping points
+                def _test_jitter_value(test_name: str) -> float:
+                    h = int(hashlib.sha256(test_name.encode("utf-8")).hexdigest(), 16)
+                    amplitude = float(st.session_state.get("jitter_amplitude", 0.015))
+                    return (((h % 11) - 5) * amplitude)
+
+                # Jitter only failures (pass_value == 0). Keep others on exact bands (-1 and 1)
+                jitter = chart_df["test"].map(_test_jitter_value)
+                is_fail = chart_df["pass_value"].astype(float) == 0.0
+                # Cap jitter within +-0.15 so points do not cross tick lines visually
+                capped_jitter = jitter.clip(lower=-0.15, upper=0.15)
+                chart_df["y_jitter"] = chart_df["pass_value"].astype(float)
+                chart_df.loc[is_fail, "y_jitter"] = chart_df.loc[is_fail, "pass_value"].astype(float) + capped_jitter[is_fail]
+
+                lines = (
                     alt.Chart(chart_df)
-                    .mark_line(point=alt.OverlayMarkDef(size=120))
+                    .mark_line(strokeOpacity=0.6, strokeWidth=1)
                     .encode(
                         x=alt.X("commit_date:T", title="Commit Date"),
                         y=alt.Y(
                             "pass_value:Q",
                             title="Pass (1) / Fail (0) / Not run (-1)",
-                            scale=alt.Scale(domain=[-1.05, 1.05]),
+                            scale=alt.Scale(domain=[-1.15, 1.15]),
                             axis=alt.Axis(values=[-1, 0, 1]),
                         ),
+                        color=alt.Color("test:N", title="Test"),
+                    )
+                )
+
+                points = (
+                    alt.Chart(chart_df)
+                    .mark_circle(size=42, opacity=0.9)
+                    .encode(
+                        x="commit_date:T",
+                        y=alt.Y("y_jitter:Q", title=None),
                         color=alt.Color("test:N", title="Test"),
                         tooltip=[
                             alt.Tooltip("test:N", title="Test"),
@@ -437,9 +485,9 @@ else:
                             alt.Tooltip("metrics:N", title="Metrics"),
                         ],
                     )
-                    .properties(height=320)
                 )
-                st.altair_chart(chart, use_container_width=True)
+
+                st.altair_chart((lines + points).properties(height=360), use_container_width=True)
 
     AgGrid(
         display_df,
