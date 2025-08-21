@@ -4,24 +4,25 @@
   "commit": "38e9ef10be7424a03af669a89c001e8f25d3740c",
   "created": "2025-08-20T15:38:37Z",
   "tests": {
-    "grpo-deepscaler": {
-      "status": "good",
-      "metrics": {
-        "step_time": 0.27,
-        "tokens_per_s": 1200
-      }
-    },
-    "sft-llama": {
-      "status": "good",
-      "metrics": {
-        "val_loss": 2.03
-      }
-    },
-    "dpo-helpsteer": {
-      "status": "fail",
-      "metrics": {
-        "preference_accuracy": 0.61
-      }
-    }
+    "grpo-test-01": { "status": "good", "metrics": { "step_time": 0.25, "tokens_per_s": 1250 } },
+    "grpo-test-02": { "status": "good", "metrics": { "step_time": 0.26, "tokens_per_s": 1230 } },
+    "grpo-test-03": { "status": "good", "metrics": { "step_time": 0.24, "tokens_per_s": 1275 } },
+    "grpo-test-04": { "status": "good", "metrics": { "step_time": 0.27, "tokens_per_s": 1210 } },
+    "grpo-test-05": { "status": "good", "metrics": { "step_time": 0.23, "tokens_per_s": 1290 } },
+    "grpo-test-06": { "status": "good", "metrics": { "step_time": 0.25, "tokens_per_s": 1245 } },
+    "grpo-test-07": { "status": "good", "metrics": { "step_time": 0.26, "tokens_per_s": 1225 } },
+    "grpo-test-08": { "status": "good", "metrics": { "step_time": 0.24, "tokens_per_s": 1280 } },
+    "grpo-test-09": { "status": "good", "metrics": { "step_time": 0.25, "tokens_per_s": 1260 } },
+    "grpo-test-10": { "status": "good", "metrics": { "step_time": 0.26, "tokens_per_s": 1235 } },
+    "sft-test-01":  { "status": "good", "metrics": { "val_loss": 2.01 } },
+    "sft-test-02":  { "status": "good", "metrics": { "val_loss": 1.98 } },
+    "sft-test-03":  { "status": "good", "metrics": { "val_loss": 1.95 } },
+    "sft-test-04":  { "status": "good", "metrics": { "val_loss": 2.05 } },
+    "sft-test-05":  { "status": "good", "metrics": { "val_loss": 2.00 } },
+    "sft-test-06":  { "status": "good", "metrics": { "val_loss": 1.97 } },
+    "sft-test-07":  { "status": "good", "metrics": { "val_loss": 1.93 } },
+    "sft-test-08":  { "status": "good", "metrics": { "val_loss": 1.99 } },
+    "sft-test-09":  { "status": "good", "metrics": { "val_loss": 1.96 } },
+    "sft-test-10":  { "status": "good", "metrics": { "val_loss": 1.94 } }
   }
 }

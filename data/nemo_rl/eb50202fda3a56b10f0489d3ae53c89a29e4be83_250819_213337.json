@@ -4,23 +4,26 @@
   "commit": "eb50202fda3a56b10f0489d3ae53c89a29e4be83",
   "created": "2025-08-19T21:33:37Z",
   "tests": {
-    "grpo-deepscaler": {
-      "status": "fail",
-      "metrics": {
-        "step_time": 0.35
-      }
-    },
-    "rm-helpsteer": {
-      "status": "good",
-      "metrics": {
-        "pair_accuracy": 0.72
-      }
-    },
-    "eval-math500": {
-      "status": "good",
-      "metrics": {
-        "pass_at_1": 0.34
-      }
-    }
+    "grpo-test-01": { "status": "good", "metrics": { "step_time": 0.34 } },
+    "grpo-test-02": { "status": "good", "metrics": { "step_time": 0.33 } },
+    "grpo-test-03": { "status": "good", "metrics": { "step_time": 0.32 } },
+    "grpo-test-04": { "status": "good", "metrics": { "step_time": 0.31 } },
+    "grpo-test-05": { "status": "good", "metrics": { "step_time": 0.30 } },
+    "grpo-test-06": { "status": "good", "metrics": { "step_time": 0.29 } },
+    "grpo-test-07": { "status": "fail", "metrics": { "step_time": 0.40 } },
+    "grpo-test-08": { "status": "fail", "metrics": { "step_time": 0.41 } },
+    "grpo-test-21": { "status": "fail", "metrics": { "step_time": 0.42 } },
+    "grpo-test-22": { "status": "fail", "metrics": { "step_time": 0.43 } },
+
+    "sft-test-01":  { "status": "good", "metrics": { "val_loss": 2.10 } },
+    "sft-test-02":  { "status": "good", "metrics": { "val_loss": 2.08 } },
+    "sft-test-03":  { "status": "good", "metrics": { "val_loss": 2.05 } },
+    "sft-test-04":  { "status": "good", "metrics": { "val_loss": 2.00 } },
+    "sft-test-05":  { "status": "good", "metrics": { "val_loss": 1.98 } },
+    "sft-test-06":  { "status": "good", "metrics": { "val_loss": 1.97 } },
+    "sft-test-07":  { "status": "fail", "metrics": { "val_loss": 2.50 } },
+    "sft-test-08":  { "status": "fail", "metrics": { "val_loss": 2.55 } },
+    "sft-test-21":  { "status": "fail", "metrics": { "val_loss": 2.60 } },
+    "sft-test-22":  { "status": "fail", "metrics": { "val_loss": 2.65 } }
   }
 }
