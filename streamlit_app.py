@@ -16,7 +16,7 @@ from st_aggrid import AgGrid, GridOptionsBuilder
 st.set_page_config(page_title="NeMo RL Nightly HUD", page_icon="🧭", layout="wide")
 st.title("🧭 NeMo RL Nightly HUD")
 st.caption(
-    "Nightly CI HUD for commits in NVIDIA-NeMo/RL. Commits fetched from GitHub and CI results loaded from local JSON files."
+    "Nightly CI HUD for commits in NVIDIA-NeMo/RL."
 )
 
 
@@ -379,14 +379,6 @@ else:
         if col in display_df.columns:
             gb.configure_column(col, pinned="left")
     grid_options = gb.build()
-    AgGrid(
-        display_df,
-        gridOptions=grid_options,
-        height=800,
-        theme="streamlit",
-        enable_enterprise_modules=False,
-        fit_columns_on_grid_load=False,
-    )
 
     # Build line chart: one line per test, y=pass/fail (1/0), x=commit date
     if filtered_tests:
@@ -448,6 +440,15 @@ else:
                     .properties(height=320)
                 )
                 st.altair_chart(chart, use_container_width=True)
+
+    AgGrid(
+        display_df,
+        gridOptions=grid_options,
+        height=800,
+        theme="streamlit",
+        enable_enterprise_modules=False,
+        fit_columns_on_grid_load=False,
+    )
 
 st.caption(
     "Commits source: NVIDIA-NeMo/RL on GitHub. See repository: https://github.com/NVIDIA-NeMo/RL"
